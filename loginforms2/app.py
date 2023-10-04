@@ -25,7 +25,6 @@ def flogin():
         fpassword = request.form.get("fpassword")
         connection = sqlite3.connect('logins2.db')
         cursor = connection.cursor()
-    
         print(fusername, fpassword)
         # Use parameterized query to prevent SQL injection
         query = "SELECT facid, fname, fusername, fpassword FROM Facultyss WHERE fusername = ? AND fpassword = ?"
@@ -135,7 +134,6 @@ def insert_data():
         conn.commit()
         cursor.close()
         conn.close()
-        submission_successful = True
     return render_template('facultydetails.html')
 
 @app.route('/student-login',methods=['POST'])
@@ -570,8 +568,36 @@ def padisplay():
         print("No results please try again")
     else:
         return render_template('welcomeparent.html', stuid=stuid, results = results[0], is_attendance=True, pusername=pusername)
- 
 
+@app.route("/stuprofac",methods=['POST','GET'])
+def stuprofac():
+    if request.method=='POST':
+        fname = request.args.get("fname")
+        facid = request.args.get("facid")
+        sids=request.form.get('sids')
+        connection=sqlite3.connect('logins2.db')
+        cursor=connection.cursor()
+        query="SELECT * from Studentss where sid=?"
+        cursor.execute(query,(sids,))
+        results=cursor.fetchall()
+        print(results)
+        query="select * from Markss where sid=?"
+        cursor.execute(query,(sids,))
+        marksresults=cursor.fetchall()
+        print(marksresults)
+        query="select attendance FROM studentss WHERE sid=?"
+        cursor.execute(query,(sids,))
+        attresults=cursor.fetchall()
+        print(attresults)
+        query="select * from Facultyss where facid=?"
+        cursor.execute(query,(facid,))
+        fresults=cursor.fetchall()
+        print(fresults)
+        if(len(results))==0:
+            print("invalid results")
+        else:
+            return render_template('viewstudentdata.html',results=results,sids=results[0][0],marks=marksresults,attendance=attresults[0][0])
+    return render_template('searchstudent.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
